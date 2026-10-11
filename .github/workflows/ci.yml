@@ -18,4 +18,15 @@ jobs:
         ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready --health-interval 5s
-          --health-time
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/hiring
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: ruff check app tests
+      - run: pytest tests/ -v --cov=app --cov-report=term-missing
